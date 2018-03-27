@@ -469,6 +469,7 @@ if (WITH_BINDINGS)
   # isl_test_cpp-noexceptions and isl_test_cpp (no gtest yet here)
   ##############################################################################
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  set(CMAKE_CXX_STANDARD 11)
   add_executable(isl_test_cpp-noexceptions isl_test_cpp-noexceptions.cc)
   target_link_libraries(isl_test_cpp-noexceptions isl)
   add_dependencies(isl_test_cpp-noexceptions generate_isl-noexceptions)
