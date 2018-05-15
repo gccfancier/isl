@@ -110,6 +110,7 @@ libisl_la_SOURCES = \
 	isl_blk.h \
 	isl_bound.c \
 	isl_bound.h \
+	isl_box.c \
 	isl_coalesce.c \
 	isl_constraint.c \
 	isl_constraint_private.h \
@@ -349,6 +350,7 @@ pkginclude_HEADERS = \
 	include/isl/ast_build.h \
 	include/isl/constraint.h \
 	include/isl/ctx.h \
+	include/isl/fixed_box.h \
 	include/isl/flow.h \
 	include/isl/id.h \
 	include/isl/id_type.h \

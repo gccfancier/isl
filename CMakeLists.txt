@@ -238,6 +238,7 @@ set (libisl_common_sources
     ${ISL_SOURCE_DIR}/isl_bernstein.c
     ${ISL_SOURCE_DIR}/isl_blk.c
     ${ISL_SOURCE_DIR}/isl_bound.c
+    ${ISL_SOURCE_DIR}/isl_box.c
     ${ISL_SOURCE_DIR}/isl_coalesce.c
     ${ISL_SOURCE_DIR}/isl_constraint.c
     ${ISL_SOURCE_DIR}/isl_convex_hull.c
