@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.2)
 project(isl)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_CXX_STANDARD 11)
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/isl/isl_ctx.c")
   set(ISL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/isl")
 elseif (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/isl_ctx.c")
