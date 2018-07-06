@@ -13,15 +13,19 @@ jobs:
           name: build-isl
           command: |
             cd ~/isl
-            export ISL_DIR=$(pwd)
-            VERBOSE=1 CORES=16 CMAKE_VERSION="cmake" CLANG_PREFIX="$(/clang+llvm-4.0/bin/llvm-config --prefix)" ./build.sh --isl
+            ./autogen.sh
+            mkdir -p build
+            cd build
+            # Python bindings generation not yet supported in this repo
+            # ../configure --with-clang-prefix=/clang+llvm-4.0
+            ../configure
+            make -j 16
 
       - run:
           name: test_isl
           command: |
-            cd ~/isl
-            ./flags.sh ./build/isl_test
-            ./flags.sh ./build/isl_test_int
+            cd ~/isl/build
+            make check VERBOSE=1
 
   "build-1604":
     working_directory: ~/isl
@@ -36,15 +40,19 @@ jobs:
           name: build-isl
           command: |
             cd ~/isl
-            export ISL_DIR=$(pwd)
-            VERBOSE=1 CORES=16 CMAKE_VERSION="cmake" CLANG_PREFIX="$(/clang+llvm-4.0/bin/llvm-config --prefix)" ./build.sh --isl
+            ./autogen.sh
+            mkdir -p build
+            cd build
+            # Python bindings generation not yet supported in this repo
+            # ../configure --with-clang-prefix=/clang+llvm-4.0
+            ../configure
+            make -j 16
 
       - run:
           name: test_isl
           command: |
-            cd ~/isl
-            ./flags.sh ./build/isl_test
-            ./flags.sh ./build/isl_test_int
+            cd ~/isl/build
+            make check VERBOSE=1
 workflows:
   version: 2
   build:
