@@ -42,8 +42,6 @@
 #include "cpp.h"
 #include "isl_config.h"
 
-bool extensions = true;
-
 /* Print string formatted according to "fmt" to ostream "os".
  *
  * This osprintf method allows us to use printf style formatting constructs when
@@ -252,7 +250,6 @@ void cpp_generator::print_class(ostream &os, const isl_class &clazz)
 	print_ptr_decl(os, clazz);
 	print_downcast_decl(os, clazz);
 	print_get_ctx_decl(os);
-	print_str_decl(os, clazz);
 	osprintf(os, "\n");
 	print_persistent_callbacks_decl(os, clazz);
 	print_methods_decl(os, clazz);
@@ -491,14 +488,6 @@ void cpp_generator::print_get_ctx_decl(ostream &os)
 	osprintf(os, "  inline ctx get_ctx() const;\n");
 }
 
-void cpp_generator::print_str_decl(ostream &os, const isl_class &clazz)
-{
-	if (!clazz.fn_to_str)
-		return;
-
-	osprintf(os, "  inline std::string to_str() const;\n");
-}
-
 /* Add a space to the return type "type" if needed,
  * i.e., if it is not the type of a pointer.
  */
@@ -712,12 +701,6 @@ void cpp_generator::print_class_impl(ostream &os, const isl_class &clazz)
 	print_destructor_impl(os, clazz);
 	osprintf(os, "\n");
 	print_ptr_impl(os, clazz);
-        if (extensions) {
-          osprintf(os, "\n");
-          print_operators_impl(os, clazz);
-          osprintf(os, "\n");
-          print_str_impl(os, clazz);
-        }
 	osprintf(os, "\n");
 	if (print_downcast_impl(os, clazz))
 		osprintf(os, "\n");
@@ -1079,49 +1062,6 @@ void cpp_generator::print_get_ctx_impl(ostream &os, const isl_class &clazz)
 	osprintf(os, "ctx %s::get_ctx() const {\n", cppname);
 	osprintf(os, "  return ctx(%s_get_ctx(ptr));\n", name);
 	osprintf(os, "}\n");
-}
-
-void cpp_generator::print_str_impl(ostream &os, const isl_class &clazz)
-{
-	if (!clazz.fn_to_str)
-		return;
-
-	const char *name = clazz.name.c_str();
-	std::string cppstring = type2cpp(clazz);
-	const char *cppname = cppstring.c_str();
-	osprintf(os, "std::string %s::to_str() const {\n", cppname);
-	osprintf(os, "  char *Tmp = %s_to_str(get());\n", name, name);
-	osprintf(os, "  if (!Tmp)\n");
-	osprintf(os, "    return \"\";\n");
-	osprintf(os, "  std::string S(Tmp);\n");
-	osprintf(os, "  free(Tmp);\n");
-	osprintf(os, "  return S;\n");
-	osprintf(os, "}\n");
-	osprintf(os, "\n");
-}
-
-void cpp_generator::print_operators_impl(ostream &os, const isl_class &clazz)
-{
-	std::string cppstring = type2cpp(clazz);
-	const char *cppname = cppstring.c_str();
-        if (clazz.fn_to_str) {
-	        osprintf(os, "inline std::ostream& operator<<(std::ostream& os, const %s& C) {\n", cppname);
-        	osprintf(os, "  os << C.to_str();\n");
-        	osprintf(os, "  return os;\n");
-        	osprintf(os, "}\n");
-        	osprintf(os, "\n");
-        }
-        if (clazz.fn_is_equal) {
-		QualType return_type = clazz.fn_is_equal->getReturnType();
-	        osprintf(os,
-                         "inline %s operator==(const %s& C1, const %s& C2) {\n",
-			 type2cpp(return_type).c_str(),
-                         cppname,
-                         cppname);
-        	osprintf(os, "  return C1.is_equal(C2);\n");
-        	osprintf(os, "}\n");
-        	osprintf(os, "\n");
-        }
 }
 
 /* Print the implementations of the methods needed for the persistent callbacks
