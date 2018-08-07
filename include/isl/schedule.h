@@ -172,7 +172,6 @@ __isl_export
 __isl_give isl_union_map *isl_schedule_get_map(__isl_keep isl_schedule *sched);
 
 isl_ctx *isl_schedule_get_ctx(__isl_keep isl_schedule *sched);
-__isl_export
 isl_bool isl_schedule_plain_is_equal(__isl_keep isl_schedule *schedule1,
 	__isl_keep isl_schedule *schedule2);
 
@@ -203,7 +202,6 @@ __isl_give isl_schedule *isl_schedule_insert_guard(
 __isl_export
 __isl_give isl_schedule *isl_schedule_sequence(
 	__isl_take isl_schedule *schedule1, __isl_take isl_schedule *schedule2);
-__isl_export
 __isl_give isl_schedule *isl_schedule_set(
 	__isl_take isl_schedule *schedule1, __isl_take isl_schedule *schedule2);
 __isl_give isl_schedule *isl_schedule_intersect_domain(
@@ -211,7 +209,6 @@ __isl_give isl_schedule *isl_schedule_intersect_domain(
 __isl_give isl_schedule *isl_schedule_gist_domain_params(
 	__isl_take isl_schedule *schedule, __isl_take isl_set *context);
 
-__isl_export
 __isl_give isl_schedule *isl_schedule_reset_user(
 	__isl_take isl_schedule *schedule);
 __isl_give isl_schedule *isl_schedule_align_params(
