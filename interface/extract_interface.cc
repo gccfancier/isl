@@ -78,6 +78,7 @@
 #include "generator.h"
 #include "python.h"
 #include "cpp.h"
+#include "cpp_conversion.h"
 
 using namespace std;
 using namespace clang;
@@ -418,9 +419,12 @@ static void generate(MyASTConsumer &consumer, SourceManager &SM)
 	} else if (Language.compare("cpp") == 0) {
 		gen = new cpp_generator(SM, consumer.exported_types,
 			consumer.exported_functions, consumer.functions);
-	} else if (Language.compare("cpp-noexceptions") == 0) {
+	} else if (Language.compare("cpp-checked") == 0) {
 		gen = new cpp_generator(SM, consumer.exported_types,
 			consumer.exported_functions, consumer.functions, true);
+	} else if (Language.compare("cpp-checked-conversion") == 0) {
+		gen = new cpp_conversion_generator(SM, consumer.exported_types,
+			consumer.exported_functions, consumer.functions);
 	} else {
 		cerr << "Language '" << Language << "' not recognized." << endl
 		     << "Not generating bindings." << endl;

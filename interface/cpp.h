@@ -5,19 +5,19 @@ using namespace clang;
 
 /* Generator for C++ bindings.
  *
- * "noexceptions" is set if C++ bindings should be generated
- * that do not use exceptions.
+ * "checked" is set if C++ bindings should be generated
+ * that rely on the user to check for error conditions.
  */
 class cpp_generator : public generator {
 protected:
-	bool noexceptions;
+	bool checked;
 public:
 	cpp_generator(SourceManager &SM, set<RecordDecl *> &exported_types,
 		set<FunctionDecl *> exported_functions,
 		set<FunctionDecl *> functions,
-		bool noexceptions = false) :
+		bool checked = false) :
 		generator(SM, exported_types, exported_functions, functions),
-		noexceptions(noexceptions) {}
+		checked(checked) {}
 
 	enum function_kind {
 		function_kind_static_method,
@@ -97,8 +97,7 @@ private:
 		function_kind kind);
 	void print_method_ctx(ostream &os, FunctionDecl *method,
 		function_kind kind);
-	void print_on_error_continue(ostream &os, FunctionDecl *method,
-		function_kind kind);
+	void print_on_error_continue(ostream &os);
 	void print_exceptional_execution_check(ostream &os,
 		const isl_class &clazz, FunctionDecl *method,
 		function_kind kind);
@@ -124,8 +123,8 @@ private:
 		FunctionDecl *method, bool is_declaration, function_kind kind);
 	string generate_callback_args(QualType type, bool cpp);
 	string generate_callback_type(QualType type);
-	void print_wrapped_call_noexceptions(std::ostream &os, int indent,
-		const std::string &call, QualType rtype);
+	void print_wrapped_call_checked(std::ostream &os, int indent,
+		const std::string &call);
 	void print_wrapped_call(std::ostream &os, int indent,
 		const std::string &call, QualType rtype);
 	void print_callback_data_decl(ostream &os, ParmVarDecl *param,
@@ -135,11 +134,12 @@ private:
 	void print_callback_local(ostream &os, ParmVarDecl *param);
 	std::string rename_method(std::string name);
 	string isl_bool2cpp();
-	string type2cpp(const isl_class &clazz);
-	string type2cpp(string type_string);
 	string type2cpp(QualType type);
 	bool is_implicit_conversion(const isl_class &clazz, FunctionDecl *cons);
 	bool is_subclass(QualType subclass_type, const isl_class &class_type);
 	function_kind get_method_kind(const isl_class &clazz,
 		FunctionDecl *method);
+public:
+	static string type2cpp(const isl_class &clazz);
+	static string type2cpp(string type_string);
 };

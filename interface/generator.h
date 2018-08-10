@@ -67,8 +67,8 @@ struct isl_class {
 	static string name_without_type_suffix(FunctionDecl *fd);
 	/* Extract the method name corresponding to "fd". */
 	string method_name(FunctionDecl *fd) const {
-		string name = name_without_type_suffix(fd);
-		return name.substr(subclass_name.length() + 1);
+		string m_name = name_without_type_suffix(fd);
+		return m_name.substr(subclass_name.length() + 1);
 	}
 	/* The prefix of any method that may set a (persistent) callback. */
 	static const char *set_callback_prefix;

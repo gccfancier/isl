@@ -50,7 +50,7 @@ static void test_return_bool(isl::ctx ctx)
 	bool b_false = univ.is_empty();
 	bool caught = false;
 	try {
-		bool b_error = null.is_empty();
+		null.is_empty();
 		die("no exception raised");
 	} catch (const isl::exception &e) {
 		caught = true;
@@ -255,7 +255,7 @@ static void test_ast_build(isl::ctx ctx)
 	assert(count_ast_fail == 2);
 }
 
-/* Test the isl C++ interface
+/* Test the (unchecked) isl C++ interface
  *
  * This includes:
  *  - The isl C <-> C++ pointer interface
@@ -285,4 +285,6 @@ int main()
 	test_ast_build_expr(ctx);
 
 	isl_ctx_free(ctx);
+
+	return EXIT_SUCCESS;
 }

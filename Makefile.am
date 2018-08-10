@@ -27,8 +27,8 @@ endif
 endif
 if HAVE_CLANG
 if HAVE_CXX11
-  noinst_PROGRAMS += isl_test_cpp-noexceptions
-  TESTS += isl_test_cpp-noexceptions
+  noinst_PROGRAMS += isl_test_cpp-checked isl_test_cpp-checked-conversion
+  TESTS += isl_test_cpp-checked isl_test_cpp-checked-conversion
 endif
 if HAVE_PYTHON
   TESTS += isl_test_python.py
@@ -301,12 +301,19 @@ isl_test_cpp_SOURCES = \
 isl_test_cpp_LDFLAGS = @MP_LDFLAGS@
 isl_test_cpp_LDADD = libisl.la @MP_LIBS@
 
-isl_test_cpp_noexceptions_CXXFLAGS = @CXX11FLAGS@
-isl_test_cpp_noexceptions_SOURCES = \
-	isl_test_cpp-noexceptions.cc \
-	interface/isl-noexceptions.h
-isl_test_cpp_noexceptions_LDFLAGS = @MP_LDFLAGS@
-isl_test_cpp_noexceptions_LDADD = libisl.la @MP_LIBS@
+isl_test_cpp_checked_CXXFLAGS = @CXX11FLAGS@
+isl_test_cpp_checked_SOURCES = \
+	isl_test_cpp-checked.cc \
+	include/isl/cpp-checked.h
+isl_test_cpp_checked_LDFLAGS = @MP_LDFLAGS@
+isl_test_cpp_checked_LDADD = libisl.la @MP_LIBS@
+
+isl_test_cpp_checked_conversion_CXXFLAGS = @CXX11FLAGS@
+isl_test_cpp_checked_conversion_SOURCES = \
+	isl_test_cpp-checked-conversion.cc \
+	include/isl/cpp-checked-conversion.h
+isl_test_cpp_checked_conversion_LDFLAGS = @MP_LDFLAGS@
+isl_test_cpp_checked_conversion_LDADD = libisl.la @MP_LIBS@
 
 # dummy library that captures the dependencies on all headers
 # that are relevant for the bindings
@@ -330,15 +337,25 @@ include/isl/cpp.h: interface/extract_interface libdep.a \
 		cat $(srcdir)/cpp/cpp.h.bot) \
 			> $@ || (rm $@ && false)
 
-interface/isl-noexceptions.h: interface/extract_interface libdep.a \
-		cpp/isl-noexceptions.h.top \
-		cpp/isl-noexceptions.h.pre cpp/isl-noexceptions.h.bot
-	(cat $(srcdir)/cpp/isl-noexceptions.h.top $(srcdir)/all.h \
-	    $(srcdir)/cpp/isl-noexceptions.h.pre && \
+include/isl/cpp-checked.h: interface/extract_interface libdep.a \
+		cpp/cpp-checked.h.top \
+		cpp/cpp-checked.h.pre cpp/cpp-checked.h.bot
+	(cat $(srcdir)/cpp/cpp-checked.h.top $(srcdir)/all.h \
+	    $(srcdir)/cpp/cpp-checked.h.pre && \
 		interface/extract_interface$(EXEEXT) \
-			--language=cpp-noexceptions \
+			--language=cpp-checked \
 			$(includes) $(srcdir)/all.h && \
-		cat $(srcdir)/cpp/isl-noexceptions.h.bot) \
+		cat $(srcdir)/cpp/cpp-checked.h.bot) \
+			> $@ || (rm $@ && false)
+
+include/isl/cpp-checked-conversion.h: interface/extract_interface libdep.a \
+		cpp/cpp-checked-conversion.h.top \
+		cpp/cpp-checked-conversion.h.bot
+	(cat $(srcdir)/cpp/cpp-checked-conversion.h.top && \
+		interface/extract_interface$(EXEEXT) \
+			--language=cpp-checked-conversion \
+			$(includes) $(srcdir)/all.h && \
+		cat $(srcdir)/cpp/cpp-checked-conversion.h.bot) \
 			> $@ || (rm $@ && false)
 endif
 
@@ -407,7 +424,10 @@ pkginclude_HEADERS = \
 	include/isl/vertices.h
 
 if HAVE_CLANG
-    CPP_INTERFACES = include/isl/cpp.h interface/isl-noexceptions.h
+    CPP_INTERFACES = \
+	include/isl/cpp.h \
+	include/isl/cpp-checked.h \
+	include/isl/cpp-checked-conversion.h
 endif
 BUILT_SOURCES = gitversion.h $(CPP_INTERFACES)
 CLEANFILES = gitversion.h interface/isl.py $(CPP_INTERFACES)

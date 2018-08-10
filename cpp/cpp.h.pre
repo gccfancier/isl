@@ -7,6 +7,20 @@
 #include <stdexcept>
 #include <string>
 
+/* ISL_USE_EXCEPTIONS should be defined to 1 if exceptions are available.
+ * gcc and clang define __cpp_exceptions; MSVC and xlC define _CPPUNWIND.
+ * Older versions of gcc (e.g., 4.9) only define __EXCEPTIONS.
+ * If exceptions are not available, any error condition will result
+ * in an abort.
+ */
+#ifndef ISL_USE_EXCEPTIONS
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND) || defined(__EXCEPTIONS)
+#define ISL_USE_EXCEPTIONS	1
+#else
+#define ISL_USE_EXCEPTIONS	0
+#endif
+#endif
+
 namespace isl {
 
 class ctx {
@@ -22,6 +36,20 @@ public:
 		return ptr;
 	}
 };
+
+/* Macros hiding try/catch.
+ * If exceptions are not available, then no exceptions will be thrown and
+ * there is nothing to catch.
+ */
+#if ISL_USE_EXCEPTIONS
+#define ISL_CPP_TRY		try
+#define ISL_CPP_CATCH_ALL	catch (...)
+#else
+#define ISL_CPP_TRY		if (1)
+#define ISL_CPP_CATCH_ALL	if (0)
+#endif
+
+#if ISL_USE_EXCEPTIONS
 
 /* Class capturing isl errors.
  *
@@ -42,9 +70,28 @@ public:
 	}
 	static inline exception create(enum isl_error error, const char *msg,
 		const char *file, int line);
-	static inline exception create_from_last_error(isl::ctx ctx);
+	static inline exception create_from_last_error(ctx ctx);
 	virtual const char *what() const noexcept {
 		return what_str->c_str();
+	}
+
+	/* Default behavior on error conditions that occur inside isl calls
+	 * performed from inside the bindings.
+	 * In the case exceptions are available, isl should continue
+	 * without printing a warning since the warning message
+	 * will be included in the exception thrown from inside the bindings.
+	 */
+	static constexpr auto on_error = ISL_ON_ERROR_CONTINUE;
+	/* Wrapper for throwing an exception with the given message.
+	 */
+	static void throw_invalid(const char *msg, const char *file, int line) {
+		throw create(isl_error_invalid, msg, file, line);
+	}
+	/* Wrapper for throwing an exception corresponding to the last
+	 * error on "ctx".
+	 */
+	static void throw_last_error(ctx ctx) {
+		throw create_from_last_error(ctx);
 	}
 };
 
@@ -128,7 +175,7 @@ exception exception::create(enum isl_error error, const char *msg,
 				return exception_unsupported(msg, file, line);
 	}
 
-	throw exception_invalid("invalid error type", __FILE__, __LINE__);
+	throw exception_invalid("invalid error type", file, line);
 }
 
 /* Create an exception from the last error that occurred on "ctx" and
@@ -137,7 +184,7 @@ exception exception::create(enum isl_error error, const char *msg,
  * If "ctx" is NULL or if it is not in an error state at the start,
  * then an invalid argument exception is thrown.
  */
-exception exception::create_from_last_error(isl::ctx ctx)
+exception exception::create_from_last_error(ctx ctx)
 {
 	enum isl_error error;
 	const char *msg, *file;
@@ -152,6 +199,37 @@ exception exception::create_from_last_error(isl::ctx ctx)
 	return create(error, msg, file, line);
 }
 
+#else
+
+#include <stdio.h>
+#include <stdlib.h>
+
+class exception {
+public:
+	/* Default behavior on error conditions that occur inside isl calls
+	 * performed from inside the bindings.
+	 * In the case exceptions are not available, isl should abort.
+	 */
+	static constexpr auto on_error = ISL_ON_ERROR_ABORT;
+	/* Wrapper for throwing an exception with the given message.
+	 * In the case exceptions are not available, print an error and abort.
+	 */
+	static void throw_invalid(const char *msg, const char *file, int line) {
+		fprintf(stderr, "%s:%d: %s\n", file, line, msg);
+		abort();
+	}
+	/* Wrapper for throwing an exception corresponding to the last
+	 * error on "ctx".
+	 * isl should already abort when an error condition occurs,
+	 * so this function should never be called.
+	 */
+	static void throw_last_error(ctx ctx) {
+		abort();
+	}
+};
+
+#endif
+
 /* Helper class for setting the on_error and resetting the option
  * to the original value when leaving the scope.
  */
@@ -159,7 +237,7 @@ class options_scoped_set_on_error {
 	isl_ctx *ctx;
 	int saved_on_error;
 public:
-	options_scoped_set_on_error(isl::ctx ctx, int on_error) {
+	options_scoped_set_on_error(class ctx ctx, int on_error) {
 		this->ctx = ctx.get();
 		saved_on_error = isl_options_get_on_error(this->ctx);
 		isl_options_set_on_error(this->ctx, on_error);
