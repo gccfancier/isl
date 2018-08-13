@@ -50,7 +50,6 @@ __isl_give isl_ast_build *isl_ast_build_alloc(isl_ctx *ctx);
 __isl_export
 __isl_give isl_ast_build *isl_ast_build_from_context(__isl_take isl_set *set);
 
-__isl_export
 __isl_give isl_space *isl_ast_build_get_schedule_space(
 	__isl_keep isl_ast_build *build);
 __isl_export
@@ -123,7 +122,6 @@ __isl_give isl_ast_node *isl_ast_build_node_from_schedule(
 __isl_export
 __isl_give isl_ast_node *isl_ast_build_node_from_schedule_map(
 	__isl_keep isl_ast_build *build, __isl_take isl_union_map *schedule);
-__isl_export
 __isl_give isl_ast_node *isl_ast_build_ast_from_schedule(
 	__isl_keep isl_ast_build *build, __isl_take isl_union_map *schedule);
 

@@ -34,7 +34,6 @@ __isl_give isl_union_set *isl_union_set_reset_user(
 __isl_export
 __isl_give isl_union_set *isl_union_set_universe(
 	__isl_take isl_union_set *uset);
-__isl_export
 __isl_give isl_set *isl_union_set_params(__isl_take isl_union_set *uset);
 
 __isl_export
@@ -104,7 +103,6 @@ __isl_give isl_union_set *isl_union_set_project_out(
 __isl_give isl_union_set *isl_union_set_remove_divs(
 	__isl_take isl_union_set *bset);
 
-__isl_export
 isl_bool isl_union_set_is_params(__isl_keep isl_union_set *uset);
 __isl_export
 isl_bool isl_union_set_is_empty(__isl_keep isl_union_set *uset);
@@ -115,7 +113,6 @@ isl_bool isl_union_set_is_subset(__isl_keep isl_union_set *uset1,
 __isl_export
 isl_bool isl_union_set_is_equal(__isl_keep isl_union_set *uset1,
 	__isl_keep isl_union_set *uset2);
-__isl_export
 isl_bool isl_union_set_is_disjoint(__isl_keep isl_union_set *uset1,
 	__isl_keep isl_union_set *uset2);
 __isl_export
