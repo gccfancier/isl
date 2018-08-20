@@ -301,8 +301,8 @@ generator::generator(SourceManager &SM, set<RecordDecl *> &exported_types,
 
 	for (in = exported_functions.begin(); in != exported_functions.end();
 	     ++in) {
-		isl_class *c;
 		FunctionDecl *method = *in;
+		isl_class *c;
 
 		if (is_subclass(method))
 			continue;

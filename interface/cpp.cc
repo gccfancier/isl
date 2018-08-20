@@ -758,12 +758,12 @@ static void print_throw_NULL_input(ostream &os)
  *
  * Omit the check if checked C++ bindings are being generated.
  */
-void cpp_generator::print_check_ptr(ostream &os)
+void cpp_generator::print_check_ptr(ostream &os, const char *ptr)
 {
 	if (checked)
 		return;
 
-	osprintf(os, "  if (!ptr)\n");
+	osprintf(os, "  if (!%s)\n", ptr);
 	print_throw_NULL_input(os);
 }
 
@@ -772,13 +772,14 @@ void cpp_generator::print_check_ptr(ostream &os)
  *
  * Omit the check if checked C++ bindings are being generated.
  */
-void cpp_generator::print_check_ptr_start(ostream &os, const isl_class &clazz)
+void cpp_generator::print_check_ptr_start(ostream &os, const isl_class &clazz,
+	const char *ptr)
 {
 	if (checked)
 		return;
 
-	print_check_ptr(os);
-	osprintf(os, "  auto ctx = %s_get_ctx(ptr);\n", clazz.name.c_str());
+	print_check_ptr(os, ptr);
+	osprintf(os, "  auto ctx = %s_get_ctx(%s);\n", clazz.name.c_str(), ptr);
 	print_on_error_continue(os);
 }
 
@@ -788,12 +789,12 @@ void cpp_generator::print_check_ptr_start(ostream &os, const isl_class &clazz)
  *
  * Omit the check if checked C++ bindings are being generated.
  */
-void cpp_generator::print_check_ptr_end(ostream &os)
+void cpp_generator::print_check_ptr_end(ostream &os, const char *ptr)
 {
 	if (checked)
 		return;
 
-	osprintf(os, "  if (!ptr)\n");
+	osprintf(os, "  if (!%s)\n", ptr);
 	print_throw_last_error(os);
 }
 
@@ -826,15 +827,15 @@ void cpp_generator::print_class_factory_impl(ostream &os,
 		return;
 
 	osprintf(os, "%s manage(__isl_take %s *ptr) {\n", cppname, name);
-	print_check_ptr(os);
+	print_check_ptr(os, "ptr");
 	osprintf(os, "  return %s(ptr);\n", cppname);
 	osprintf(os, "}\n");
 
 	osprintf(os, "%s manage_copy(__isl_keep %s *ptr) {\n", cppname,
 		name);
-	print_check_ptr_start(os, clazz);
+	print_check_ptr_start(os, clazz, "ptr");
 	osprintf(os, "  ptr = %s_copy(ptr);\n", name);
-	print_check_ptr_end(os);
+	print_check_ptr_end(os, "ptr");
 	osprintf(os, "  return %s(ptr);\n", cppname);
 	osprintf(os, "}\n");
 }
@@ -878,7 +879,6 @@ void cpp_generator::print_protected_constructors_impl(ostream &os,
 void cpp_generator::print_public_constructors_impl(ostream &os,
 	const isl_class &clazz)
 {
-	const char *name = clazz.name.c_str();
 	std::string cppstring = type2cpp(clazz);
 	std::string super;
 	const char *cppname = cppstring.c_str();
@@ -897,19 +897,12 @@ void cpp_generator::print_public_constructors_impl(ostream &os,
 	else
 		osprintf(os, "    : ptr(nullptr)\n");
 	osprintf(os, "{\n");
-	if (!checked && !subclass) {
-		osprintf(os, "  if (!obj.ptr)\n");
-		print_throw_NULL_input(os);
-		osprintf(os, "  auto ctx = %s_get_ctx(obj.ptr);\n", name);
-		print_on_error_continue(os);
-	}
-	if (!subclass)
+	if (!subclass) {
+		print_check_ptr_start(os, clazz, "obj.ptr");
 		osprintf(os, "  ptr = obj.copy();\n");
-	if (clazz.has_persistent_callbacks())
-		osprintf(os, "  copy_callbacks(obj);\n");
-	if (!checked && !subclass) {
-		osprintf(os, "  if (obj.ptr && !ptr)\n");
-		print_throw_last_error(os);
+		if (clazz.has_persistent_callbacks())
+			osprintf(os, "  copy_callbacks(obj);\n");
+		print_check_ptr_end(os, "ptr");
 	}
 	osprintf(os, "}\n");
 }
@@ -1576,14 +1569,14 @@ void cpp_generator::print_set_persistent_callback(ostream &os,
 	print_persistent_callback_setter_prototype(os, clazz, method, false);
 	osprintf(os, "\n");
 	osprintf(os, "{\n");
-	print_check_ptr_start(os, clazz);
+	print_check_ptr_start(os, clazz, "ptr");
 	osprintf(os, "  %s_data = std::make_shared<struct %s_data>();\n",
 		callback_name.c_str(), callback_name.c_str());
 	osprintf(os, "  %s_data->func = %s;\n",
 		callback_name.c_str(), pname.c_str());
 	osprintf(os, "  ptr = %s(ptr, &%s, %s_data.get());\n",
 		fullname.c_str(), callback_name.c_str(), callback_name.c_str());
-	print_check_ptr_end(os);
+	print_check_ptr_end(os, "ptr");
 	osprintf(os, "}\n\n");
 
 	print_method_header(os, clazz, method, false, kind);
