@@ -1625,8 +1625,8 @@ void cpp_generator::print_method_return(ostream &os, const isl_class &clazz,
 		if (returns_super)
 			osprintf(os, ".as<%s>()", rettype_str.c_str());
 		osprintf(os, ";\n");
-	} else if (is_isl_bool(return_type) || is_isl_stat(return_type)) {
-		osprintf(os, "  return %s(res);\n", rettype_str.c_str());
+	} else if (is_isl_stat(return_type)) {
+		osprintf(os, "  return;\n");
 	} else if (is_string(return_type)) {
 		osprintf(os, "  std::string tmp(res);\n");
 		if (gives(method))
