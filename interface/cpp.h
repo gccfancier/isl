@@ -45,7 +45,6 @@ private:
 	void print_ptr_decl(ostream &os, const isl_class &clazz);
 	void print_downcast_decl(ostream &os, const isl_class &clazz);
 	void print_get_ctx_decl(ostream &os);
-	void print_str_decl(ostream &os, const isl_class &clazz);
 	void print_persistent_callback_prototype(ostream &os,
 		const isl_class &clazz, FunctionDecl *method,
 		bool is_declaration);
@@ -85,8 +84,6 @@ private:
 	void print_ptr_impl(ostream &os, const isl_class &clazz);
 	bool print_downcast_impl(ostream &os, const isl_class &clazz);
 	void print_get_ctx_impl(ostream &os, const isl_class &clazz);
-	void print_str_impl(ostream &os, const isl_class &clazz);
-	void print_operators_impl(ostream &os, const isl_class &clazz);
 	void print_persistent_callbacks_impl(ostream &os,
 		const isl_class &clazz);
 	void print_methods_impl(ostream &os, const isl_class &clazz);
@@ -114,6 +111,7 @@ private:
 	void print_set_enums_impl(ostream &os, const isl_class &clazz,
 		FunctionDecl *fd);
 	void print_set_enums_impl(ostream &os, const isl_class &clazz);
+	void print_stream_insertion(ostream &os, const isl_class &clazz);
 	void print_method_param_use(ostream &os, ParmVarDecl *param,
 		bool load_from_this_ptr);
 	std::string get_return_type(const isl_class &clazz, FunctionDecl *fd);
