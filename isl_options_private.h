@@ -34,6 +34,7 @@ struct isl_options {
 	int			convex;
 
 	int			coalesce_bounded_wrapping;
+	int			coalesce_preserve_locals;
 
 	int			schedule_nonneg_var_coefficient;
 	int			schedule_max_coefficient;
