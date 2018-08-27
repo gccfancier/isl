@@ -149,6 +149,9 @@ ISL_ARG_CHOICE(struct isl_options, convex, 0, "convex-hull", \
 	convex,	ISL_CONVEX_HULL_WRAP, "convex hull algorithm to use")
 ISL_ARG_BOOL(struct isl_options, coalesce_bounded_wrapping, 0,
 	"coalesce-bounded-wrapping", 1, "bound wrapping during coalescing")
+ISL_ARG_BOOL(struct isl_options, coalesce_preserve_locals, 0,
+	"coalesce-preserve-locals", 0,
+	"preserve local variables during coalescing")
 ISL_ARG_BOOL(struct isl_options, schedule_nonneg_var_coefficient, 0,
 	"schedule-nonneg-var-coefficient", 0, "Only consider schedules "
 	"where the coefficients of the variable dimensions "
@@ -273,6 +276,11 @@ ISL_CTX_SET_BOOL_DEF(isl_options, struct isl_options, isl_options_args,
 	coalesce_bounded_wrapping)
 ISL_CTX_GET_BOOL_DEF(isl_options, struct isl_options, isl_options_args,
 	coalesce_bounded_wrapping)
+
+ISL_CTX_SET_BOOL_DEF(isl_options, struct isl_options, isl_options_args,
+	coalesce_preserve_locals)
+ISL_CTX_GET_BOOL_DEF(isl_options, struct isl_options, isl_options_args,
+	coalesce_preserve_locals)
 
 ISL_CTX_SET_BOOL_DEF(isl_options, struct isl_options, isl_options_args,
 	gbr_only_first)
