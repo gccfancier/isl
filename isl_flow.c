@@ -519,12 +519,12 @@ __isl_give isl_map *isl_flow_get_no_source(__isl_keep isl_flow *deps, int must)
 		return isl_set_unwrap(isl_set_copy(deps->may_no_source));
 }
 
-void isl_flow_free(__isl_take isl_flow *deps)
+__isl_null isl_flow *isl_flow_free(__isl_take isl_flow *deps)
 {
 	int i;
 
 	if (!deps)
-		return;
+		return NULL;
 	isl_set_free(deps->must_no_source);
 	isl_set_free(deps->may_no_source);
 	if (deps->dep) {
@@ -533,6 +533,8 @@ void isl_flow_free(__isl_take isl_flow *deps)
 		free(deps->dep);
 	}
 	free(deps);
+
+	return NULL;
 }
 
 isl_ctx *isl_flow_get_ctx(__isl_keep isl_flow *deps)
@@ -1395,18 +1397,18 @@ static __isl_give struct isl_sched_info *sched_info_alloc(
 	__isl_keep isl_map *map)
 {
 	isl_ctx *ctx;
-	isl_space *dim;
+	isl_space *space;
 	struct isl_sched_info *info;
 	int i, n;
 
 	if (!map)
 		return NULL;
 
-	dim = isl_space_unwrap(isl_space_domain(isl_map_get_space(map)));
-	if (!dim)
+	space = isl_space_unwrap(isl_space_domain(isl_map_get_space(map)));
+	if (!space)
 		return NULL;
-	n = isl_space_dim(dim, isl_dim_in);
-	isl_space_free(dim);
+	n = isl_space_dim(space, isl_dim_in);
+	isl_space_free(space);
 
 	ctx = isl_map_get_ctx(map);
 	info = isl_alloc_type(ctx, struct isl_sched_info);

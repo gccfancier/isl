@@ -519,7 +519,7 @@ static int collect_filter_prefix_update(__isl_keep isl_schedule_tree *tree,
 	isl_multi_union_pw_aff *mupa;
 	isl_union_set *filter;
 	isl_union_map *extension;
-	int empty;
+	isl_bool empty;
 
 	type = isl_schedule_tree_get_type(tree);
 	switch (type) {
@@ -953,7 +953,7 @@ isl_bool isl_schedule_node_has_parent(__isl_keep isl_schedule_node *node)
 int isl_schedule_node_get_child_position(__isl_keep isl_schedule_node *node)
 {
 	int n;
-	int has_parent;
+	isl_bool has_parent;
 
 	if (!node)
 		return -1;
@@ -1981,7 +1981,7 @@ __isl_give isl_schedule_node *isl_schedule_node_band_sink(
 	enum isl_schedule_node_type type;
 	isl_schedule_tree *tree, *child;
 	isl_union_pw_multi_aff *contraction;
-	int anchored;
+	isl_bool anchored;
 
 	if (!node)
 		return NULL;
@@ -2934,7 +2934,7 @@ struct isl_schedule_group_data {
 static int locally_covered_by_domain(__isl_keep isl_union_set *domain,
 	struct isl_schedule_group_data *data)
 {
-	int is_subset;
+	isl_bool is_subset;
 	isl_union_set *test;
 
 	test = isl_union_set_copy(domain);
@@ -2966,7 +2966,8 @@ static __isl_give isl_schedule_tree *group_band(
 	isl_multi_aff *ma;
 	isl_multi_union_pw_aff *mupa, *partial;
 	int is_covered;
-	int depth, n, has_id;
+	int depth, n;
+	isl_bool has_id;
 
 	domain = isl_schedule_node_get_domain(pos);
 	is_covered = locally_covered_by_domain(domain, data);
@@ -3032,7 +3033,7 @@ static __isl_give isl_schedule_tree *group_context(
 	isl_space *space;
 	isl_union_set *domain;
 	int n1, n2;
-	int involves;
+	isl_bool involves;
 
 	if (isl_schedule_node_get_tree_depth(pos) == 1)
 		return tree;
@@ -3101,7 +3102,7 @@ static __isl_give isl_schedule_tree *group_domain(
 	struct isl_schedule_group_data *data)
 {
 	isl_union_set *domain;
-	int is_subset;
+	isl_bool is_subset;
 
 	domain = isl_schedule_tree_domain_get_domain(tree);
 	is_subset = isl_union_set_is_subset(data->domain, domain);
@@ -3285,7 +3286,7 @@ __isl_give isl_schedule_node *isl_schedule_node_group(
 	isl_union_set *domain;
 	isl_union_pw_multi_aff *contraction;
 	isl_union_map *expansion;
-	int disjoint;
+	isl_bool disjoint;
 
 	if (!node || !group_id)
 		goto error;
@@ -3498,14 +3499,14 @@ static __isl_give isl_schedule_node *gist_enter_extension(
  * this test since the current domain elements are incomparable
  * to the domain elements in the original context.
  */
-static int gist_done(__isl_keep isl_schedule_node *node,
+static isl_bool gist_done(__isl_keep isl_schedule_node *node,
 	struct isl_node_gist_data *data)
 {
 	isl_union_set *filter, *outer;
-	int subset;
+	isl_bool subset;
 
 	if (data->n_expansion != 0)
-		return 0;
+		return isl_bool_false;
 
 	filter = isl_schedule_node_filter_get_filter(node);
 	outer = isl_union_set_list_get_union_set(data->filters, 0);
@@ -3552,7 +3553,7 @@ static __isl_give isl_schedule_node *gist_enter(
 
 	do {
 		isl_union_set *filter, *inner;
-		int done, empty;
+		isl_bool done, empty;
 		int n;
 
 		switch (isl_schedule_node_get_type(node)) {
@@ -3665,7 +3666,7 @@ static __isl_give isl_schedule_node *gist_leave(
 		for (i = n - 1; i >= 0; --i) {
 			isl_schedule_tree *child;
 			isl_union_set *filter;
-			int empty;
+			isl_bool empty;
 
 			child = isl_schedule_tree_get_child(tree, i);
 			filter = isl_schedule_tree_filter_get_filter(child);
@@ -4230,7 +4231,7 @@ static __isl_give isl_schedule_node *extend_extension(
 	__isl_take isl_schedule_node *node, __isl_take isl_union_map *extension)
 {
 	int pos;
-	int disjoint;
+	isl_bool disjoint;
 	isl_union_map *node_extension;
 
 	node = isl_schedule_node_parent(node);
@@ -4438,7 +4439,7 @@ static __isl_give isl_schedule_node *extension_from_domain(
 	isl_union_set *domain;
 	isl_union_map *ext;
 	int depth;
-	int anchored;
+	isl_bool anchored;
 	isl_space *space;
 	isl_schedule_node *res;
 	isl_schedule_tree *tree;
@@ -4585,7 +4586,7 @@ static __isl_give isl_schedule_node *isl_schedule_node_order_before_or_after(
 	isl_union_set *node_domain, *node_filter = NULL, *parent_filter;
 	isl_schedule_node *node2;
 	isl_schedule_tree *tree1, *tree2;
-	int empty1, empty2;
+	isl_bool empty1, empty2;
 	int in_seq;
 
 	if (!node || !filter)

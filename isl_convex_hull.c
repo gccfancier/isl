@@ -157,8 +157,8 @@ error:
 	return -1;
 }
 
-static struct isl_basic_set *isl_basic_set_add_equality(
-	struct isl_basic_set *bset, isl_int *c)
+static __isl_give isl_basic_set *isl_basic_set_add_equality(
+	__isl_take isl_basic_set *bset, isl_int *c)
 {
 	int i;
 	unsigned dim;
@@ -1295,7 +1295,7 @@ static __isl_give isl_basic_set *convex_hull_pair(
 	__isl_take isl_basic_set *bset1, __isl_take isl_basic_set *bset2)
 {
 	isl_basic_set *lin, *aff;
-	int bounded1, bounded2;
+	isl_bool bounded1, bounded2;
 
 	if (bset1->ctx->opt->convex == ISL_CONVEX_HULL_FM)
 		return convex_hull_pair_elim(bset1, bset2);
@@ -2983,7 +2983,7 @@ __isl_give isl_basic_set *isl_set_unshifted_simple_hull_from_set_list(
 
 /* Given a set "set", return parametric bounds on the dimension "dim".
  */
-static struct isl_basic_set *set_bounds(struct isl_set *set, int dim)
+static __isl_give isl_basic_set *set_bounds(__isl_keep isl_set *set, int dim)
 {
 	unsigned set_dim = isl_set_dim(set, isl_dim_set);
 	set = isl_set_copy(set);

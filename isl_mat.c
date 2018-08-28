@@ -1380,7 +1380,8 @@ __isl_give isl_basic_set *isl_basic_set_preimage(
 	isl_assert(ctx, mat->n_col > 0, goto error);
 
 	if (mat->n_col > mat->n_row) {
-		bset = isl_basic_set_extend(bset, 0, mat->n_col-1, 0, 0, 0);
+		bset = isl_basic_set_add_dims(bset, isl_dim_set,
+						mat->n_col - mat->n_row);
 		if (!bset)
 			goto error;
 	} else if (mat->n_col < mat->n_row) {
@@ -1403,7 +1404,7 @@ __isl_give isl_basic_set *isl_basic_set_preimage(
 
 	ISL_F_CLR(bset, ISL_BASIC_SET_NO_IMPLICIT);
 	ISL_F_CLR(bset, ISL_BASIC_SET_NO_REDUNDANT);
-	ISL_F_CLR(bset, ISL_BASIC_SET_NORMALIZED);
+	ISL_F_CLR(bset, ISL_BASIC_SET_SORTED);
 	ISL_F_CLR(bset, ISL_BASIC_SET_NORMALIZED_DIVS);
 	ISL_F_CLR(bset, ISL_BASIC_SET_ALL_EQUALITIES);
 
