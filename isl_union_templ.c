@@ -74,19 +74,19 @@ static int FN(UNION,find_param_by_id)(__isl_keep UNION *u,
 }
 
 #ifdef HAS_TYPE
-static __isl_give UNION *FN(UNION,alloc)(__isl_take isl_space *dim,
+static __isl_give UNION *FN(UNION,alloc)(__isl_take isl_space *space,
 	enum isl_fold type, int size)
 #else
-static __isl_give UNION *FN(UNION,alloc)(__isl_take isl_space *dim, int size)
+static __isl_give UNION *FN(UNION,alloc)(__isl_take isl_space *space, int size)
 #endif
 {
 	UNION *u;
 
-	dim = isl_space_params(dim);
-	if (!dim)
+	space = isl_space_params(space);
+	if (!space)
 		return NULL;
 
-	u = isl_calloc_type(dim->ctx, UNION);
+	u = isl_calloc_type(space->ctx, UNION);
 	if (!u)
 		goto error;
 
@@ -94,13 +94,13 @@ static __isl_give UNION *FN(UNION,alloc)(__isl_take isl_space *dim, int size)
 #ifdef HAS_TYPE
 	u->type = type;
 #endif
-	u->space = dim;
-	if (isl_hash_table_init(dim->ctx, &u->table, size) < 0)
+	u->space = space;
+	if (isl_hash_table_init(space->ctx, &u->table, size) < 0)
 		return FN(UNION,free)(u);
 
 	return u;
 error:
-	isl_space_free(dim);
+	isl_space_free(space);
 	return NULL;
 }
 
@@ -497,19 +497,21 @@ error:
 
 __isl_give UNION *FN(FN(UNION,from),BASE)(__isl_take PART *part)
 {
-	isl_space *dim;
+	isl_space *space;
 	UNION *u;
 
 	if (!part)
 		return NULL;
 
-	dim = FN(PART,get_space)(part);
-	dim = isl_space_drop_dims(dim, isl_dim_in, 0, isl_space_dim(dim, isl_dim_in));
-	dim = isl_space_drop_dims(dim, isl_dim_out, 0, isl_space_dim(dim, isl_dim_out));
+	space = FN(PART,get_space)(part);
+	space = isl_space_drop_dims(space, isl_dim_in, 0,
+					isl_space_dim(space, isl_dim_in));
+	space = isl_space_drop_dims(space, isl_dim_out, 0,
+					isl_space_dim(space, isl_dim_out));
 #ifdef HAS_TYPE
-	u = FN(UNION,ZERO)(dim, part->type);
+	u = FN(UNION,ZERO)(space, part->type);
 #else
-	u = FN(UNION,ZERO)(dim);
+	u = FN(UNION,ZERO)(space);
 #endif
 	u = FN(FN(UNION,add),BASE)(u, part);
 
@@ -684,12 +686,12 @@ S(UNION,match_domain_data) {
 	__isl_give PW *(*fn)(__isl_take PW*, __isl_take isl_set*);
 };
 
-static int FN(UNION,set_has_dim)(const void *entry, const void *val)
+static int FN(UNION,set_has_space)(const void *entry, const void *val)
 {
 	isl_set *set = (isl_set *)entry;
-	isl_space *dim = (isl_space *)val;
+	isl_space *space = (isl_space *)val;
 
-	return isl_space_is_equal(set->dim, dim);
+	return isl_space_is_equal(set->dim, space);
 }
 
 /* Find the set in data->uset that lives in the same space as the domain
@@ -706,7 +708,7 @@ static isl_stat FN(UNION,match_domain_entry)(__isl_take PART *part, void *user)
 	space = FN(PART,get_domain_space)(part);
 	hash = isl_space_get_hash(space);
 	entry2 = isl_hash_table_find(data->uset->dim->ctx, &data->uset->table,
-				     hash, &FN(UNION,set_has_dim), space, 0);
+				     hash, &FN(UNION,set_has_space), space, 0);
 	isl_space_free(space);
 	if (!entry2) {
 		FN(PART,free)(part);

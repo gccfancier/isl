@@ -1877,7 +1877,7 @@ static isl_bool domain_follows_at_depth(__isl_keep isl_basic_set *i,
 	empty = isl_basic_map_is_empty(test);
 	isl_basic_map_free(test);
 
-	return empty < 0 ? isl_bool_error : !empty;
+	return isl_bool_not(empty);
 }
 
 /* Split up each element of "list" into a part that is related to "bset"
@@ -2101,7 +2101,7 @@ static isl_bool shared_outer(__isl_keep isl_basic_set *i,
 	empty = isl_basic_map_is_empty(test);
 	isl_basic_map_free(test);
 
-	return empty < 0 ? isl_bool_error : !empty;
+	return isl_bool_not(empty);
 }
 
 /* Internal data structure for generate_sorted_domains_wrap.
@@ -2795,7 +2795,7 @@ static __isl_give isl_set *compute_unroll_domains(
 	isl_set *unroll_domain;
 	isl_basic_set_list *unroll_list;
 	int i, n;
-	int empty;
+	isl_bool empty;
 
 	empty = isl_set_is_empty(domains->option[isl_ast_loop_unroll]);
 	if (empty < 0)
@@ -3091,7 +3091,7 @@ static __isl_give isl_basic_set_list *compute_domains(
 	isl_space *space;
 	int n_param;
 	enum isl_ast_loop_type type;
-	int empty;
+	isl_bool empty;
 
 	if (!executed)
 		return NULL;
@@ -4284,7 +4284,7 @@ static int after_in_band(__isl_keep isl_union_map *umap,
 	isl_union_map *partial, *test, *gt, *universe, *umap1, *umap2;
 	isl_union_set *domain, *range;
 	isl_space *space;
-	int empty;
+	isl_bool empty;
 	int after;
 
 	if (isl_schedule_node_band_n_member(node) == 0)
@@ -4482,7 +4482,8 @@ static int after_in_sequence(__isl_keep isl_union_map *umap,
 {
 	int i, j, n;
 	isl_union_map *umap_i;
-	int empty, after = 0;
+	isl_bool empty;
+	int after = 0;
 
 	n = isl_schedule_node_n_children(node);
 	for (i = 1; i < n; ++i) {
@@ -4541,7 +4542,7 @@ error:
 static int after_in_tree(__isl_keep isl_union_map *umap,
 	__isl_keep isl_schedule_node *node)
 {
-	int empty;
+	isl_bool empty;
 	enum isl_schedule_node_type type;
 
 	empty = isl_union_map_is_empty(umap);

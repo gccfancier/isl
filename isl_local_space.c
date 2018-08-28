@@ -45,47 +45,47 @@ uint32_t isl_local_space_get_hash(__isl_keep isl_local_space *ls)
 	return hash;
 }
 
-__isl_give isl_local_space *isl_local_space_alloc_div(__isl_take isl_space *dim,
-	__isl_take isl_mat *div)
+__isl_give isl_local_space *isl_local_space_alloc_div(
+	__isl_take isl_space *space, __isl_take isl_mat *div)
 {
 	isl_ctx *ctx;
 	isl_local_space *ls = NULL;
 
-	if (!dim || !div)
+	if (!space || !div)
 		goto error;
 
-	ctx = isl_space_get_ctx(dim);
+	ctx = isl_space_get_ctx(space);
 	ls = isl_calloc_type(ctx, struct isl_local_space);
 	if (!ls)
 		goto error;
 
 	ls->ref = 1;
-	ls->dim = dim;
+	ls->dim = space;
 	ls->div = div;
 
 	return ls;
 error:
 	isl_mat_free(div);
-	isl_space_free(dim);
+	isl_space_free(space);
 	isl_local_space_free(ls);
 	return NULL;
 }
 
-__isl_give isl_local_space *isl_local_space_alloc(__isl_take isl_space *dim,
+__isl_give isl_local_space *isl_local_space_alloc(__isl_take isl_space *space,
 	unsigned n_div)
 {
 	isl_ctx *ctx;
 	isl_mat *div;
 	unsigned total;
 
-	if (!dim)
+	if (!space)
 		return NULL;
 
-	total = isl_space_dim(dim, isl_dim_all);
+	total = isl_space_dim(space, isl_dim_all);
 
-	ctx = isl_space_get_ctx(dim);
+	ctx = isl_space_get_ctx(space);
 	div = isl_mat_alloc(ctx, n_div, 1 + 1 + total + n_div);
-	return isl_local_space_alloc_div(dim, div);
+	return isl_local_space_alloc_div(space, div);
 }
 
 __isl_give isl_local_space *isl_local_space_from_space(__isl_take isl_space *dim)
@@ -250,18 +250,19 @@ int isl_local_space_dim(__isl_keep isl_local_space *ls,
 unsigned isl_local_space_offset(__isl_keep isl_local_space *ls,
 	enum isl_dim_type type)
 {
-	isl_space *dim;
+	isl_space *space;
 
 	if (!ls)
 		return 0;
 
-	dim = ls->dim;
+	space = ls->dim;
 	switch (type) {
 	case isl_dim_cst:	return 0;
 	case isl_dim_param:	return 1;
-	case isl_dim_in:	return 1 + dim->nparam;
-	case isl_dim_out:	return 1 + dim->nparam + dim->n_in;
-	case isl_dim_div:	return 1 + dim->nparam + dim->n_in + dim->n_out;
+	case isl_dim_in:	return 1 + space->nparam;
+	case isl_dim_out:	return 1 + space->nparam + space->n_in;
+	case isl_dim_div:
+		return 1 + space->nparam + space->n_in + space->n_out;
 	default:		return 0;
 	}
 }

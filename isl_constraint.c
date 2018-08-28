@@ -279,7 +279,7 @@ __isl_give isl_constraint_list *isl_basic_map_get_constraint_list(
 	__isl_keep isl_basic_map *bmap)
 {
 	int n;
-	int known;
+	isl_bool known;
 	isl_ctx *ctx;
 	isl_constraint_list *list;
 
@@ -328,16 +328,16 @@ struct isl_basic_map *isl_basic_map_add_constraint(
 	struct isl_basic_map *bmap, struct isl_constraint *constraint)
 {
 	isl_ctx *ctx;
-	isl_space *dim;
+	isl_space *space;
 	int equal_space;
 
 	if (!bmap || !constraint)
 		goto error;
 
 	ctx = isl_constraint_get_ctx(constraint);
-	dim = isl_constraint_get_space(constraint);
-	equal_space = isl_space_is_equal(bmap->dim, dim);
-	isl_space_free(dim);
+	space = isl_constraint_get_space(constraint);
+	equal_space = isl_space_is_equal(bmap->dim, space);
+	isl_space_free(space);
 	isl_assert(ctx, equal_space, goto error);
 
 	bmap = isl_basic_map_intersect(bmap,
@@ -373,6 +373,14 @@ __isl_give isl_set *isl_set_add_constraint(__isl_take isl_set *set,
 	return isl_map_add_constraint(set, constraint);
 }
 
+/* Return the space of "constraint".
+ */
+static __isl_keep isl_space *isl_constraint_peek_space(
+	__isl_keep isl_constraint *constraint)
+{
+	return constraint ? isl_local_space_peek_space(constraint->ls) : NULL;
+}
+
 __isl_give isl_space *isl_constraint_get_space(
 	__isl_keep isl_constraint *constraint)
 {
@@ -385,7 +393,7 @@ __isl_give isl_local_space *isl_constraint_get_local_space(
 	return constraint ? isl_local_space_copy(constraint->ls) : NULL;
 }
 
-int isl_constraint_dim(struct isl_constraint *constraint,
+int isl_constraint_dim(__isl_keep isl_constraint *constraint,
 	enum isl_dim_type type)
 {
 	if (!constraint)
@@ -600,10 +608,6 @@ __isl_give isl_constraint *isl_constraint_set_coefficient(
 			"position out of bounds",
 			return isl_constraint_free(constraint));
 
-	constraint = isl_constraint_cow(constraint);
-	if (!constraint)
-		return NULL;
-
 	constraint->v = isl_vec_cow(constraint->v);
 	if (!constraint->v)
 		return isl_constraint_free(constraint);
@@ -654,10 +658,6 @@ __isl_give isl_constraint *isl_constraint_set_coefficient_si(
 		isl_die(constraint->v->ctx, isl_error_invalid,
 			"position out of bounds",
 			return isl_constraint_free(constraint));
-
-	constraint = isl_constraint_cow(constraint);
-	if (!constraint)
-		return NULL;
 
 	constraint->v = isl_vec_cow(constraint->v);
 	if (!constraint->v)
@@ -790,12 +790,11 @@ error:
 __isl_give isl_basic_set *isl_basic_set_from_constraint(
 	__isl_take isl_constraint *constraint)
 {
-	if (!constraint)
-		return NULL;
+	isl_space *space;
 
-	if (isl_constraint_dim(constraint, isl_dim_in) != 0)
-		isl_die(isl_constraint_get_ctx(constraint), isl_error_invalid,
-			"not a set constraint", goto error);
+	space = isl_constraint_peek_space(constraint);
+	if (isl_space_check_is_set(space, "not a set constraint") < 0)
+		goto error;
 	return bset_from_bmap(isl_basic_map_from_constraint(constraint));
 error:
 	isl_constraint_free(constraint);
@@ -1254,6 +1253,7 @@ error:
 __isl_give isl_aff *isl_constraint_get_bound(
 	__isl_keep isl_constraint *constraint, enum isl_dim_type type, int pos)
 {
+	isl_space *space;
 	isl_aff *aff;
 	isl_ctx *ctx;
 
@@ -1263,9 +1263,9 @@ __isl_give isl_aff *isl_constraint_get_bound(
 	if (pos >= isl_constraint_dim(constraint, type))
 		isl_die(ctx, isl_error_invalid,
 			"index out of bounds", return NULL);
-	if (isl_constraint_dim(constraint, isl_dim_in) != 0)
-		isl_die(ctx, isl_error_invalid,
-			"not a set constraint", return NULL);
+	space = isl_constraint_peek_space(constraint);
+	if (isl_space_check_is_set(space, "not a set constraint") < 0)
+		return NULL;
 
 	pos += offset(constraint, type);
 	if (isl_int_is_zero(constraint->v->el[pos]))

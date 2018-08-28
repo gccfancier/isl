@@ -1258,7 +1258,7 @@ int test_affine_hull(struct isl_ctx *ctx)
 	isl_set *set;
 	isl_basic_set *bset, *bset2;
 	int n;
-	int subset;
+	isl_bool subset;
 
 	test_affine_hull_case(ctx, "affine2");
 	test_affine_hull_case(ctx, "affine");
@@ -1733,10 +1733,10 @@ static int test_gist(struct isl_ctx *ctx)
 	const char *str;
 	isl_basic_set *bset1, *bset2;
 	isl_map *map1, *map2;
-	int equal;
+	isl_bool equal;
 
 	for (i = 0; i < ARRAY_SIZE(gist_tests); ++i) {
-		int equal_input, equal_intersection;
+		isl_bool equal_input, equal_intersection;
 		isl_set *set1, *set2, *copy, *context;
 
 		set1 = isl_set_read_from_str(ctx, gist_tests[i].set);
@@ -2264,6 +2264,33 @@ static int test_coalesce_special3(isl_ctx *ctx)
 	return 0;
 }
 
+/* Check that calling isl_set_coalesce does not leave other sets
+ * that may share some information with the input to isl_set_coalesce
+ * in an inconsistent state.
+ * In particular, when isl_set_coalesce detects equality constraints,
+ * it does not immediately perform Gaussian elimination on them,
+ * but then it needs to ensure that it is performed at some point.
+ * The input set has implicit equality constraints in the first disjunct.
+ * It is constructed as an intersection, because otherwise
+ * those equality constraints would already be detected during parsing.
+ */
+static isl_stat test_coalesce_special4(isl_ctx *ctx)
+{
+	isl_set *set1, *set2;
+
+	set1 = isl_set_read_from_str(ctx, "{ [a, b] : b <= 0 or a <= 1 }");
+	set2 = isl_set_read_from_str(ctx, "{ [a, b] : -1 <= -a < b }");
+	set1 = isl_set_intersect(set1, set2);
+	isl_set_free(isl_set_coalesce(isl_set_copy(set1)));
+	set1 = isl_set_coalesce(set1);
+	isl_set_free(set1);
+
+	if (!set1)
+		return isl_stat_error;
+
+	return isl_stat_ok;
+}
+
 /* Test the functionality of isl_set_coalesce.
  * That is, check that the output is always equal to the input
  * and in some cases that the result consists of a single disjunct.
@@ -2286,6 +2313,8 @@ static int test_coalesce(struct isl_ctx *ctx)
 	if (test_coalesce_special2(ctx) < 0)
 		return -1;
 	if (test_coalesce_special3(ctx) < 0)
+		return -1;
+	if (test_coalesce_special4(ctx) < 0)
 		return -1;
 
 	return 0;
@@ -8390,7 +8419,7 @@ static __isl_give isl_id *before_for(__isl_keep isl_ast_build *build,
 	isl_union_map *schedule;
 	isl_union_set *uset;
 	isl_set *set;
-	int empty;
+	isl_bool empty;
 	char name[] = "d0";
 
 	ctx = isl_ast_build_get_ctx(build);
